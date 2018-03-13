@@ -4,7 +4,7 @@
             <Command Description="" DisplayName="Orchestration Save" Name="orchestration_save" />
             <Command Description="" DisplayName="Orchestration Restore" Name="orchestration_restore" />
          </Category>
-        <Category Name="Samples">
+         <Category Name="Samples">
             <Command Description="Simple hello world function" DisplayName="Say Hello" Name="say_hello" >
                 <Parameters>
                     <Parameter Name="name" Type="String" Mandatory = "True" DefaultValue="" DisplayName="Your name"
@@ -16,10 +16,11 @@
                     <Parameter Name="sendcmd" Type="String" Mandatory = "True" DefaultValue="ip a" DisplayName="sendcmd"
                                Description="enter command here"/>
                 </Parameters>
+            </Command>
             <Command Description="get snmp" DisplayName="get snmp" Name="get_snmp" >
                 <Parameters>
-                    <Parameter Name="miboid" Type="String" Mandatory = "True" DefaultValue=".1.3.6.1.2.1.1" DisplayName="miboid"
-                               Description="enter command here"/>
+                    <Parameter Name="miboid" Type="String" Mandatory = "True" DefaultValue="sysName" DisplayName="miboid"
+                               Description="input snmp name"/>
                 </Parameters>
             </Command>
         </Category>

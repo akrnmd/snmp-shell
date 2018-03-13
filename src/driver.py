@@ -6,6 +6,10 @@ from cloudshell.cli.cli import CLI
 from cloudshell.cli.session.ssh_session import SSHSession
 from cloudshell.cli.command_mode import CommandMode
 
+from cloudshell.core.logger.qs_logger import get_qs_logger
+from cloudshell.snmp.quali_snmp import QualiSnmp, QualiMibTable
+
+
 class LinuxServerShellDriver (ResourceDriverInterface):
 
     def __init__(self):
@@ -155,8 +159,14 @@ class LinuxServerShellDriver (ResourceDriverInterface):
         return out
 
     def get_snmp(self, miboid):
+        logger = get_qs_logger()
 
+        snmp_service = QualiSnmp(snmp_parameters("192.168.30.21"),
+                                 logger=logger)
+        out = snmp_service.get_property('SNMPv2-MIB', miboid, 0)
+        print(out)
 
-        return snmp_response
+        return out
+
 
     # </editor-fold>
