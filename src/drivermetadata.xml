@@ -19,6 +19,8 @@
             </Command>
             <Command Description="get snmp" DisplayName="get snmp" Name="get_snmp" >
                 <Parameters>
+                    <Parameter Name="snmp_module_name" Type="String" Mandatory = "True" DefaultValue="SNMPv2-MIB" DisplayName="snmp module name"
+                               Description="input snmp module name"/>
                     <Parameter Name="miboid" Type="String" Mandatory = "True" DefaultValue="sysName" DisplayName="miboid"
                                Description="input snmp name"/>
                 </Parameters>
