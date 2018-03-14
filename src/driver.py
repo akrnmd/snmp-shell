@@ -8,7 +8,7 @@ from cloudshell.cli.command_mode import CommandMode
 
 from cloudshell.core.logger.qs_logger import get_qs_logger
 from cloudshell.snmp.quali_snmp import QualiSnmp, QualiMibTable
-
+from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
 
 class LinuxServerShellDriver (ResourceDriverInterface):
 
@@ -161,8 +161,8 @@ class LinuxServerShellDriver (ResourceDriverInterface):
     def get_snmp(self, miboid):
         logger = get_qs_logger()
 
-        snmp_service = QualiSnmp(snmp_parameters("192.168.30.21"),
-                                 logger=logger)
+        snmp_read_parameters = SNMPV2ReadParameters("192.168.30.21", "public")
+        snmp_service = QualiSnmp(snmp_read_parameters, logger=logger)
         out = snmp_service.get_property('SNMPv2-MIB', miboid, 0)
         print(out)
 
