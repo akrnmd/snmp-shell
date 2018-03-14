@@ -150,6 +150,11 @@ class LinuxServerShellDriver (ResourceDriverInterface):
         return "hello {name} from {resource_name}".format(name=name, resource_name=context.resource.name)
 
     def send_any_cmd(self, context, sendcmd):
+        """
+        :param InitCommandContext context : passed in by cloudshell
+        :param str sendcmd: the command to send to the CLI
+        """
+
         cli = CLI()
         mode = CommandMode(r'#')  # for example r'%\s*$'
         session = CloudShellAPISession(host=context.connectivity.server_address,
@@ -168,6 +173,13 @@ class LinuxServerShellDriver (ResourceDriverInterface):
         return out
 
     def get_snmp(self, context, miboid):
+        """
+        :param InitCommandContext context: this is the context passed by cloudshell automatically
+        :param str miboid: 'management information base object id'
+        :return:
+        """
+
+
         session = CloudShellAPISession(host=context.connectivity.server_address,
                                        token_id=context.connectivity.admin_auth_token,
                                        domain=context.reservation.domain)
