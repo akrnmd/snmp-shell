@@ -172,6 +172,7 @@ class LinuxServerShellDriver (ResourceDriverInterface):
 
         return out
 
+
     def get_snmp(self, context, miboid):
         """
         :param InitCommandContext context: this is the context passed by cloudshell automatically
@@ -179,20 +180,27 @@ class LinuxServerShellDriver (ResourceDriverInterface):
         :return:
         """
 
-
         session = CloudShellAPISession(host=context.connectivity.server_address,
                                        token_id=context.connectivity.admin_auth_token,
                                        domain=context.reservation.domain)
+        reservation_id = context.reservation.reservation_id
         logger = get_qs_logger()
         address = context.resource.address
         snmp_read_community = session.DecryptPassword(context.resource.attributes['LinuxServerShell.SNMP Read Community']).Value
         snmp_v2_parameters = SNMPV2ReadParameters(ip=address, snmp_read_community=snmp_read_community)
         snmp_service = QualiSnmp(snmp_v2_parameters, logger)
-        out = snmp_service.get_property('SNMPv2-MIB', miboid, 0)
-        print out
-        return out
+
+        for index, info in snmp_service.get_table(snmp_module_name, miboid).items():
+            session.WriteMessageToReservationOutput(reservation_id, "[{0}]".format(index))
+            for key, value in info.items():
+                session.WriteMessageToReservationOutput(reservation_id, " {0}: {1}".format(key, value))
+
+        return "\nEnd of execution"
 
     def get_attributes(self, context):
         return context.resource.attributes
+
+    def get_context(self, context):
+        return context
 
     # </editor-fold>
