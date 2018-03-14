@@ -23,6 +23,13 @@ node_types:
     #    description: Some attribute description
     #    constraints:
     #      - valid_values: [fast, slow]
+    properties:
+      User:
+        type: string
+        tags: [setting, display_in_diagram]
+      Password:
+        type: cloudshell.datatypes.Password
+        tags: [setting, display_in_diagram]
     capabilities:
       auto_discovery_capability:
         type: cloudshell.capabilities.AutoDiscovery
@@ -36,6 +43,12 @@ node_types:
           inventory_description:
             type: string
             default: Describe the resource shell template
+          User:
+            type: string
+          Password:
+            type: cloudshell.datatypes.Password
+          SNMP Read Community:
+            type: cloudshell.datatypes.Password
     artifacts:
       icon:
         file: shell-icon.png

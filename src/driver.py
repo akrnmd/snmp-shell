@@ -1,3 +1,4 @@
+from cloudshell.api.cloudshell_api import CloudShellAPISession
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.driver_context import InitCommandContext, ResourceCommandContext, AutoLoadResource, \
     AutoLoadAttribute, AutoLoadDetails, CancellationContext
@@ -5,6 +6,9 @@ from cloudshell.shell.core.driver_context import InitCommandContext, ResourceCom
 from cloudshell.cli.cli import CLI
 from cloudshell.cli.session.ssh_session import SSHSession
 from cloudshell.cli.command_mode import CommandMode
+from cloudshell.core.logger.qs_logger import get_qs_logger
+from cloudshell.snmp.quali_snmp import QualiSnmp, QualiMibTable, SNMPParameters, SNMPV2ReadParameters
+
 
 class LinuxServerShellDriver (ResourceDriverInterface):
 
@@ -141,12 +145,17 @@ class LinuxServerShellDriver (ResourceDriverInterface):
         """
         return "hello {name} from {resource_name}".format(name=name, resource_name=context.resource.name)
 
-    def send_any_cmd(self, sendcmd):
+    def send_any_cmd(self, context, sendcmd):
         cli = CLI()
-        mode = CommandMode(r'#') # for example r'%\s*$'
+        mode = CommandMode(r'#')  # for example r'%\s*$'
+        session = CloudShellAPISession(host=context.connectivity.server_address,
+                                       token_id=context.connectivity.admin_auth_token,
+                                       domain=context.reservation.domain)
+        address = context.resource.address
+        user = context.resource.attributes['LinuxServerShell.User']
+        password = session.DecryptPassword(context.resource.attributes['LinuxServerShell.Password']).Value
 
-        session_types = [SSHSession(host='192.168.30.21',username='root',password='root')]
-
+        session_types = [SSHSession(host=address, username=user, password=password)]
 
         with cli.get_session(session_types, mode) as default_session:
             out = default_session.send_command(sendcmd)
@@ -154,9 +163,20 @@ class LinuxServerShellDriver (ResourceDriverInterface):
 
         return out
 
-    def get_snmp(self, miboid):
+    def get_snmp(self, context, miboid):
+        session = CloudShellAPISession(host=context.connectivity.server_address,
+                                       token_id=context.connectivity.admin_auth_token,
+                                       domain=context.reservation.domain)
+        logger = get_qs_logger()
+        address = context.resource.address
+        snmp_read_community = session.DecryptPassword(context.resource.attributes['LinuxServerShell.SNMP Read Community']).Value
+        snmp_v2_parameters = SNMPV2ReadParameters(ip=address, snmp_read_community=snmp_read_community)
+        snmp_service = QualiSnmp(snmp_v2_parameters, logger)
+        out = snmp_service.get_property('SNMPv2-MIB', miboid, 0)
+        print out
+        return out
 
-
-        return snmp_response
+    def get_attributes(self, context):
+        return context.resource.attributes
 
     # </editor-fold>
