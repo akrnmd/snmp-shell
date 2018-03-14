@@ -176,7 +176,7 @@ class LinuxServerShellDriver (ResourceDriverInterface):
     def get_snmp(self, context, miboid):
         """
         :param InitCommandContext context: this is the context passed by cloudshell automatically
-        :param str miboid: 'management information base object id' test
+        :param str miboid: 'management information base object id' test two
         :return:
         """
 
