@@ -10,6 +10,10 @@ from cloudshell.core.logger.qs_logger import get_qs_logger
 from cloudshell.snmp.quali_snmp import QualiSnmp, QualiMibTable, SNMPParameters, SNMPV2ReadParameters
 
 
+from cloudshell.core.logger.qs_logger import get_qs_logger
+from cloudshell.snmp.quali_snmp import QualiSnmp, QualiMibTable
+from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
+
 class LinuxServerShellDriver (ResourceDriverInterface):
 
     def __init__(self):
