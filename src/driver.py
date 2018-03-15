@@ -1,18 +1,15 @@
+# from data_model import *  # run 'shellfoundry generate' to generate data model classes
 from cloudshell.api.cloudshell_api import CloudShellAPISession
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.driver_context import InitCommandContext, ResourceCommandContext, AutoLoadResource, \
-    AutoLoadAttribute, AutoLoadDetails, CancellationContext
-#from data_model import *  # run 'shellfoundry generate' to generate data model classes
+    AutoLoadAttribute, AutoLoadDetails, CancellationContext, AutoLoadCommandContext
 from cloudshell.cli.cli import CLI
 from cloudshell.cli.session.ssh_session import SSHSession
 from cloudshell.cli.command_mode import CommandMode
 from cloudshell.core.logger.qs_logger import get_qs_logger
 from cloudshell.snmp.quali_snmp import QualiSnmp, QualiMibTable, SNMPParameters, SNMPV2ReadParameters
+from data_model import *
 
-
-from cloudshell.core.logger.qs_logger import get_qs_logger
-from cloudshell.snmp.quali_snmp import QualiSnmp, QualiMibTable
-from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
 
 class LinuxServerShellDriver (ResourceDriverInterface):
 
@@ -20,6 +17,7 @@ class LinuxServerShellDriver (ResourceDriverInterface):
         """
         ctor must be without arguments, it is created with reflection at run time
         """
+        self._logger = None
         pass
 
     def initialize(self, context):
@@ -61,7 +59,38 @@ class LinuxServerShellDriver (ResourceDriverInterface):
 
         return resource.create_autoload_details()
         '''
-        return AutoLoadDetails([], [])
+        self._logger = self._get_logger(context)
+
+        resource = LinuxServerShell.create_from_context(context)
+        session = CloudShellAPISession(host=context.connectivity.server_address,
+                                       token_id=context.connectivity.admin_auth_token,
+                                       domain='Global')
+
+        logger = get_qs_logger()
+        address = context.resource.address
+        snmp_read_community = session.DecryptPassword(context.resource.attributes['LinuxServerShell.SNMP Read Community']).Value
+        snmp_v2_parameters = SNMPV2ReadParameters(ip=address, snmp_read_community=snmp_read_community)
+        snmp_service = QualiSnmp(snmp_v2_parameters, logger)
+
+        for if_table in snmp_service.get_table('IF-MIB', 'ifTable').values():
+            port = ResourcePort(if_table['ifDescr'])
+            port.model_name = if_table['ifType']
+            port.mac_address = if_table['ifPhysAddress']
+            port.port_speed = if_table['ifSpeed']
+            for ip_table in snmp_service.get_table('IP-MIB', 'ipAddrTable').values():
+                if ip_table['ipAdEntIfIndex'] == if_table['ifIndex']:
+                    port.ipv4_address = ip_table['ipAdEntAddr']
+            resource.add_sub_resource(if_table['ifIndex'], port)
+
+        # port = ResourcePort('Port 1')
+        # resource.add_sub_resource('1', port)
+        # port = ResourcePort('Port 2')
+        # resource.add_sub_resource('2', port)
+
+        autoload_details = resource.create_autoload_details()
+        self._logger.info('autoload attributes: ' + ','.join([str(vars(x)) for x in autoload_details.attributes]))
+        self._logger.info('autoload resources: ' + ','.join([str(vars(x)) for x in autoload_details.resources]))
+        return autoload_details
 
     # </editor-fold>
 
@@ -205,3 +234,26 @@ class LinuxServerShellDriver (ResourceDriverInterface):
         return context
 
     # </editor-fold>
+
+    # private functions
+
+    def _get_logger(self, context):
+        """
+        returns a logger
+        :param context:
+        :return: the logger object
+        :rtype: logging.Logger
+        """
+        try:
+            try:
+                res_id = context.reservation.reservation_id
+            except:
+                res_id = 'out-of-reservation'
+            try:
+                resource_name = context.resource.fullname
+            except:
+                resource_name = 'no-resource'
+            logger = get_qs_logger(res_id, 'LinuxServerShellDriver', resource_name)
+            return logger
+        except Exception as e:
+            return None
