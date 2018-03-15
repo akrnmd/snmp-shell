@@ -2,6 +2,7 @@ from cloudshell.api.cloudshell_api import CloudShellAPISession
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.driver_context import InitCommandContext, ResourceCommandContext, AutoLoadResource, \
     AutoLoadAttribute, AutoLoadDetails, CancellationContext
+from data_model import *
 #from data_model import *  # run 'shellfoundry generate' to generate data model classes
 from cloudshell.cli.cli import CLI
 from cloudshell.cli.session.ssh_session import SSHSession
@@ -50,18 +51,16 @@ class LinuxServerShellDriver (ResourceDriverInterface):
         # In real life, this code will be preceded by SNMP/other calls to the resource details and will not be static
         # run 'shellfoundry generate' in order to create classes that represent your data model
 
-        '''
+
         resource = LinuxServerShell.create_from_context(context)
         resource.vendor = 'specify the shell vendor'
         resource.model = 'specify the shell model'
 
         port1 = ResourcePort('Port 1')
-        port1.ipv4_address = '192.168.10.7'
+        port1.ipv4_address = context.connectivity.server_address
         resource.add_sub_resource('1', port1)
 
         return resource.create_autoload_details()
-        '''
-        return AutoLoadDetails([], [])
 
     # </editor-fold>
 
