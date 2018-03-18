@@ -39,8 +39,8 @@ class LinuxServerShell(object):
         :return:
         """
         resources = [AutoLoadResource(model=self.resources[r].cloudshell_model_name,
-                                     name=self.resources[r].name,
-                                     relative_address=self._get_relative_path(r, relative_path))
+                                      name=self.resources[r].name,
+                                      relative_address=self._get_relative_path(r, relative_path))
                      for r in self.resources]
         attributes = [AutoLoadAttribute(relative_path, a, self.attributes[a]) for a in self.attributes]
         autoload_details = AutoLoadDetails(resources, attributes)
